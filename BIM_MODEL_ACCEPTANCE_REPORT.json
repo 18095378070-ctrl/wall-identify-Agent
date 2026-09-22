@@ -1,0 +1,51 @@
+{
+  "generated_at": "2026-09-21",
+  "model_profile": "deepseek-flash",
+  "model": "DeepSeek V4.1 Flash",
+  "mode": "live",
+  "scope_note": "03 completed full wall-precheck and final-IFC validation. 04 final conversion was stopped by the user. 05 was intentionally limited to wall precheck and live AI validation.",
+  "records": [
+    {
+      "file": "03_Structure_Walls.ifc",
+      "sha256": "977ca0ec95de35acd5038489fa04a01a1a542554c5edfa7e02663f69b7ea56aa",
+      "bytes": 446971,
+      "walls": 58,
+      "beams": 0,
+      "recommendations": {"include": 3, "exclude": 0, "review": 55},
+      "review_groups": 51,
+      "clicks_saved": 54,
+      "ai": {"mode": "live", "requested_walls": 55, "live_walls": 55, "unavailable_walls": 0, "raw_response_files": 6},
+      "timings": {"ifc_read_feature_s": 1.722, "ai_arbitration_s": 66.306, "final_model_generation_s": 13.979, "final_model_status": "ok"},
+      "final_ifc_valid": true,
+      "scope": "full-wall-and-final-ifc"
+    },
+    {
+      "file": "04_BuildingBIMModel.ifc",
+      "sha256": "050081f9f7a6d374f8feebe111897e1039ee4b62505b8caab129da906232bf17",
+      "bytes": 27475496,
+      "walls": 146,
+      "beams": 37,
+      "recommendations": {"include": 2, "exclude": 89, "review": 55},
+      "review_groups": 26,
+      "clicks_saved": 54,
+      "ai": {"mode": "live", "requested_walls": 60, "live_walls": 60, "unavailable_walls": 0, "raw_response_files": 6},
+      "timings": {"ifc_read_feature_s": 11.644, "ai_arbitration_s": 126.551, "final_model_generation_s": null, "final_model_status": "not-run"},
+      "final_ifc_valid": false,
+      "scope": "wall-precheck-only-finalization-stopped-by-user"
+    },
+    {
+      "file": "05_SampleBuilding.ifc",
+      "sha256": "fd579eeb81728f2989dc6b7e000470836844bdd45d087e2737e73edbb606cb88",
+      "bytes": 6745630,
+      "walls": 58,
+      "beams": 942,
+      "recommendations": {"include": 30, "exclude": 0, "review": 28},
+      "review_groups": 27,
+      "clicks_saved": 27,
+      "ai": {"mode": "live", "requested_walls": 28, "live_walls": 28, "unavailable_walls": 0, "raw_response_files": 3},
+      "timings": {"ifc_read_feature_s": 57.463, "ai_arbitration_s": 40.871, "final_model_generation_s": null, "final_model_status": "not-run"},
+      "final_ifc_valid": false,
+      "scope": "wall-precheck-only-by-user-request"
+    }
+  ]
+}

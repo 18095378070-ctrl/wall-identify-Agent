@@ -1,0 +1,129 @@
+========================================================
+  AI 构件预审 Agent · 工程交付版
+========================================================
+
+【定位】
+
+  本项目面向 BIM（IFC）转结构分析模型前的构件预审：
+  规则层处理证据明确的墙体，AI 只审查语义与受力证据冲突的墙体，
+  输出“建议纳入 / 建议排除 / 需人工复核”。任何建议都不是工程师定案。
+
+【安装与启动】
+
+  本包已自带便携 Python 运行时（runtime\python）及全部依赖，接收方可零安装、
+  零联网直接运行，无需在本机安装 Python。
+
+  Windows：双击 start_demo.bat 即可
+  浏览器打开：http://127.0.0.1:8010
+
+  如 runtime 目录缺失（例如只取了精简包），改用 install_and_start.bat：它会创建
+  .venv 并按 requirements.txt 安装依赖（此路径需要本机已装 Python 3.11/3.12 且有网络）。
+  也可手动执行：
+    python -m venv .venv
+    .venv\Scripts\activate
+    python -m pip install -r requirements.txt
+    python -X utf8 -m wall_agent.web.app
+
+  默认工程模式支持上传任意合法 IFC，也保留两个预置样例。
+  打开页面会弹出可选的“接入 AI 密钥”窗：
+    · 填入本机 DeepSeek 平台的 API Key → 冲突墙交给实时 AI 仲裁；
+    · 点“跳过” → 不填，冲突墙全部转人工复核。
+  该临时密钥只保存在服务进程内存，关闭服务即失效，不写入任何文件；
+  仅在本机（127.0.0.1）工程模式生效，服务一旦监听外部地址即自动关闭。
+  接口地址与模型仍由服务端固定；需要服务端常驻密钥时，仍可用环境变量
+  WALLAGENT_API_KEY。页面“清除临时密钥”按钮可随时撤销。
+
+  页面上的 AI 状态必须明确显示为：
+    · 本地临时密钥（关闭服务后失效）
+    · 服务端 AI 已配置
+    · 已验证缓存回放
+    · AI 不可用，已转人工复核
+
+【运行模式】
+
+  默认无密钥时为人工复核模式。服务端可配置：
+    WALLAGENT_LLM_MODE=live|cache|unavailable|auto
+    WALLAGENT_API_BASE_URL=https://api.deepseek.com/chat/completions
+    WALLAGENT_API_KEY=你的服务端密钥
+    WALLAGENT_ALLOW_CLIENT_KEY=1        （默认由启动脚本开启；设 0 可关闭本机临时密钥）
+    WALLAGENT_LOCAL_KEY_TTL=1800        （本机临时密钥有效期，秒）
+    WALLAGENT_DEFAULT_MODEL_PROFILE=deepseek-flash
+    WALLAGENT_ENABLED_MODEL_PROFILES=deepseek-flash,deepseek-v4-pro
+    WALLAGENT_CACHE_DIR=...
+    WALLAGENT_APP_MODE=engineering|review
+    WALLAGENT_MAX_UPLOAD_MB=200
+
+  WALLAGENT_APP_MODE 默认为 engineering，允许 IFC 上传；review 是可选的
+  样例展示模式。上传上限默认 200 MB，可通过 WALLAGENT_MAX_UPLOAD_MB 调整。
+
+【AI 模型切换】
+
+  页面默认选择 DeepSeek V4.1 Flash，也可以切换到 DeepSeek V4 Pro。两个模型
+  共用 WALLAGENT_API_KEY，每次分析只调用当前选中的一个模型。切换下拉框
+  不会自动运行，必须再次点击“开始预审”。
+
+  服务端模型配置编号：
+    deepseek-flash     快速响应，适合现场演示
+    deepseek-v4-pro    更强推理，适合复杂冲突审查
+
+  Flash 和 Pro 的缓存完全隔离；选中模型失败时不会改用另一个模型。没有该
+  模型自身的有效缓存时，冲突墙进入人工复核。旧 WALLAGENT_MODEL 仅兼容
+  上述两个已知模型；旧 deepseek-v4-flash 会兼容映射到 deepseek-flash，
+  配置新的 profile 环境变量后，以新白名单为准。
+
+  可参考根目录 .env.example，但程序不会自动读取 .env。不要把真实密钥写入
+  项目目录或交付包。比赛结束后应轮换密钥，并在 DeepSeek 控制台设置额度限制。
+
+  缓存必须通过 cache_manifest.json、请求元数据和 payload 哈希校验；
+  IFC 哈希、墙编号集合、Prompt 版本、模型名或批次编号任一不一致，都拒绝回放。
+  实时调用失败不会冒充成功结果；没有有效缓存时全部冲突墙进入人工复核。
+
+【使用流程】
+
+  1. 上传自己的 .ifc 文件，或选择“语义冲突样例”“常规样例”。
+  2. 点击“开始预审”，查看三态建议、来源、置信度和逐墙证据链。
+  3. 可点击“接受全部明确建议”，也可对同证据模式的复核墙整组处理。
+  4. “全部未决项安全纳入”只会把未决墙保留在模型中，不会自动生成模型。
+  5. 护栏重点墙必须逐面确认；任何批量动作都可用“撤销上一步”恢复。
+  6. 点击“预览并生成最终模型”，核对纳入、排除和覆盖数量后再次确认。
+
+  未确认的墙和 review 墙默认不能进入剔除查询；只有 final_action=exclude 才能剔除。
+  下载区域分为预审报告和工程师确认后的最终模型。
+
+【命令行实验】
+
+  运行回归与验收测试：
+    python -m wall_agent.tests.test_engine
+
+  三份桌面 BIM 模型真实 HTTP 验收（先在网页输入临时密钥）：
+    python -m wall_agent.run_bim_acceptance --input-dir "C:\Users\你的用户名\Desktop\BIM模型" --out-dir output\bim_acceptance
+
+  验收会输出 BIM_MODEL_ACCEPTANCE_REPORT.json、CSV 和 Markdown，并分别记录
+  IFC读取/特征提取、AI仲裁、最终模型生成耗时。真实验收强制 live，缓存不能
+  代替真实 DeepSeek 调用。
+
+  对带 truth.json 的样例做 no_ai / AI 状态评估：
+    python -m wall_agent.run_experiment --ifc wall_agent/samples/stress_semantic_conflict.ifc --truth wall_agent/samples/stress_semantic_conflict.truth.json --out output\experiment --mode unavailable
+
+  Schependomlaan 只能作为实验数据，不放入两分钟公网 Demo：
+    python -m wall_agent.run_experiment --ifc 你的Schependomlaan.ifc --reference-pset --out output\schependomlaan --mode unavailable
+
+  报告固定注明：Pset_WallCommon.LoadBearing 是原设计方自标信息，
+  只能作为外部参照，不等于独立结构分析真值。
+
+【产物】
+
+  预审阶段：*_precheck_result.json、*_precheck_report.md、*_precheck_plan.svg。
+  确认阶段：*_final_result.json、*_final_report.md、*_engineer_confirmed.ifc、
+  *_baseline_all_walls.ifc，以及逐墙工程师确认审计记录。
+
+【局限】
+
+  未配置真实 API Key 时，规则冲突墙会明确进入人工复核；这不代表实时 AI
+  已被验证。随包测试使用本地模拟 OpenAI 兼容接口验证调用协议和护栏，不能
+  冒充真实模型实验。
+
+  当前系统没有宣称结构求解正确性；IFC 的外部 LoadBearing 属性也不是真值。
+  特征仍未覆盖所有构造类型，真实项目应由结构工程师复核后再进入求解器。
+
+========================================================

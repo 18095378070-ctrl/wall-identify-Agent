@@ -1,0 +1,4 @@
+file,sha256,bytes,walls,beams,suggest_include,suggest_exclude,needs_review,review_groups,clicks_saved,model,ai_mode,ai_live_walls,ai_unavailable_walls,raw_response_files,ifc_read_feature_s,ai_arbitration_s,final_model_generation_s,final_model_status,final_ifc_valid,acceptance_scope
+03_Structure_Walls.ifc,977ca0ec95de35acd5038489fa04a01a1a542554c5edfa7e02663f69b7ea56aa,446971,58,0,3,0,55,51,54,deepseek-flash,live,55,0,6,1.722,66.306,13.979,ok,true,full-wall-and-final-ifc
+04_BuildingBIMModel.ifc,050081f9f7a6d374f8feebe111897e1039ee4b62505b8caab129da906232bf17,27475496,146,37,2,89,55,26,54,deepseek-flash,live,60,0,6,11.644,126.551,,not-run,false,wall-precheck-only-finalization-stopped-by-user
+05_SampleBuilding.ifc,fd579eeb81728f2989dc6b7e000470836844bdd45d087e2737e73edbb606cb88,6745630,58,942,30,0,28,27,27,deepseek-flash,live,28,0,3,57.463,40.871,,not-run,false,wall-precheck-only-by-user-request
